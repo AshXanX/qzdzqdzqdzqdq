@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Complete</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5865F2;
+            --bg-dark: #1e1e2d;
+            --text: #f0f0f0;
+        }
+        
+        body {
+            background: url('<%= backgroundPath %>') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text);
+        }
+        
+        .verified-container {
+            background: rgba(30, 30, 45, 0.9);
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .logo {
+            height: 60px;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .user-info {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .username {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(59, 165, 92, 0.2);
+            color: #3BA55C;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="verified-container">
+        <img src="<%= logoPath %>" alt="Logo" class="logo">
+        <h1>Verification Complete</h1>
+        
+        <div class="user-info">
+            <div class="username"><%= user.username %></div>
+            <div class="status">
+                <i class="fas fa-check-circle"></i> Successfully verified
+            </div>
+        </div>
+        
+        <a href="/" class="btn">
+            <i class="fas fa-home"></i> Return to Home
+        </a>
+    </div>
+</body>
+</html>

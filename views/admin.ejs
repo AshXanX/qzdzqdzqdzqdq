@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5865F2;
+            --primary-dark: #4752c4;
+            --secondary: #57F287;
+            --dark: #1e1f29;
+            --darker: #171820;
+            --light: #f0f0f0;
+            --text: #ffffff;
+            --text-muted: #b9bbbe;
+            --card-bg: rgba(30, 31, 41, 0.8);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --success: #57F287;
+            --warning: #FEE75C;
+            --danger: #ED4245;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+        
+        .admin-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 3rem;
+            background: rgba(23, 24, 32, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+        
+        .logo {
+            height: 45px;
+            filter: drop-shadow(0 0 8px rgba(88, 101, 242, 0.6));
+            transition: var(--transition);
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(88, 101, 242, 0.15);
+        }
+        
+        .nav-link:hover:before, .nav-link.active:before {
+            width: 100%;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .dashboard-title {
+            font-size: 2.5rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .dashboard-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            border: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(88, 101, 242, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(88, 101, 242, 0.15);
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .stat-card h3 {
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .panel-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            padding: 1.5rem 2rem;
+            background: rgba(88, 101, 242, 0.1);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .panel-title i {
+            color: var(--primary);
+        }
+        
+        .panel-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .panel-content {
+            padding: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .user-table th {
+            text-align: left;
+            padding: 1.2rem 1.5rem;
+            background: rgba(88, 101, 242, 0.1);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .user-table td {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text);
+        }
+        
+        .user-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .user-table tr:hover td {
+            background: rgba(88, 101, 242, 0.05);
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+        
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(88, 101, 242, 0.4);
+        }
+        
+        .btn-danger {
+            background: rgba(237, 66, 69, 0.15);
+            color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background: rgba(237, 66, 69, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(237, 66, 69, 0.2);
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .ip-cell {
+            position: relative;
+        }
+        
+        .ip-value {
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .ip-value:hover {
+            filter: none;
+        }
+        
+        .token-cell {
+            position: relative;
+            max-width: 150px;
+        }
+        
+        .token-value {
+            filter: blur(5px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            word-break: break-all;
+        }
+        
+        .token-cell:hover .token-value {
+            filter: none;
+        }
+        
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--darker);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .ip-cell:hover .tooltip,
+        .token-cell:hover .tooltip {
+            opacity: 1;
+        }
+        
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+        
+        .verified-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(87, 242, 135, 0.15);
+            color: var(--success);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .blacklisted-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(237, 66, 69, 0.15);
+            color: var(--danger);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.3);
+        }
+        
+        .user-count {
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--darker);
+            width: 500px;
+            max-width: 90%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--card-border);
+            animation: modalOpen 0.4s ease;
+        }
+        
+        @keyframes modalOpen {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 1.5rem 2rem;
+            background: rgba(88, 101, 242, 0.2);
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .modal-text {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            background: rgba(30, 31, 41, 0.8);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 1200px) {
+            .panel-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .main-content {
+                padding: 2rem;
+            }
+        }
+
+        .brand-logo {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .brand-name {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <div class="brand-logo">DSVerify</div>
+            <div class="nav-links">
+                <a href="/admin" class="nav-link <%= currentPath === '/admin' ? 'active' : '' %>">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/admin/transfer" class="nav-link <%= currentPath === '/admin/transfer' ? 'active' : '' %>">
+                    <i class="fas fa-exchange-alt"></i> Transfer
+                </a>
+                <a href="/logout" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <h1 class="dashboard-title">Admin Dashboard</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Total Users</h3>
+                    <div class="stat-value"><%= stats.total %></div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <h3>Today's Users</h3>
+                    <div class="stat-value"><%= stats.today %></div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Unique IPs</h3>
+                    <div class="stat-value"><%= stats.uniqueIPs %></div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Verified Users</h3>
+                    <div class="stat-value"><%= stats.verifiedCount %></div>
+                </div>
+            </div>
+            
+            <div class="panel-container">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fas fa-user-check"></i> Verified Users
+                            <span class="user-count"><%= users.length %></span>
+                        </h2>
+                        <div class="panel-actions">
+                            <button class="refresh-btn" id="refreshUsers">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="search-container">
+                            <input type="text" class="search-input" placeholder="Search users..." id="userSearch">
+                        </div>
+                        
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>IP Address</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% users.forEach(user => { %>
+                                <tr data-user-id="<%= user.id %>">
+                                    <td><%= new Date(user.date).toLocaleString() %></td>
+                                    <td><%= user.username %></td>
+                                    <td><%= user.email %></td>
+                                    <td class="ip-cell">
+                                        <span class="ip-value"><%= user.ip %></span>
+                                        <span class="tooltip">Click to reveal</span>
+                                    </td>
+                                    <td>
+                                        <div class="user-actions">
+                                            <button class="btn btn-danger btn-sm" onclick="openBlacklistModal('<%= user.id %>', '<%= user.username %>', '<%= user.ip %>')">
+                                                <i class="fas fa-ban"></i> Blacklist
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fas fa-user-shield"></i> Authorized Users
+                            <span class="user-count"><%= verifiedUsers.length %></span>
+                        </h2>
+                        <div class="panel-actions">
+                            <button class="refresh-btn" id="refreshAuthorized">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% verifiedUsers.forEach(user => { %>
+                                <tr>
+                                    <td><%= user.username %></td>
+                                    <td>
+                                        <span class="verified-badge">
+                                            <i class="fas fa-check-circle"></i> Authorized
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="user-actions">
+                                            <button class="btn btn-danger btn-sm" onclick="removeAuthorization('<%= user.id %>')">
+                                                <i class="fas fa-trash-alt"></i> Remove
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-user-slash"></i> Blacklisted Users
+                        <span class="user-count"><%= blacklist.length %></span>
+                    </h2>
+                </div>
+                <div class="panel-content">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% blacklist.forEach(user => { %>
+                            <tr>
+                                <td><%= user.username %></td>
+                                <td class="ip-cell">
+                                    <span class="ip-value"><%= user.ip %></span>
+                                    <span class="tooltip">Click to reveal</span>
+                                </td>
+                                <td>
+                                    <span class="blacklisted-badge">
+                                        <i class="fas fa-ban"></i> Blacklisted
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="user-actions">
+                                        <button class="btn btn-outline btn-sm" onclick="removeBlacklist('<%= user.id %>')">
+                                            <i class="fas fa-undo"></i> Restore
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="blacklistModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Blacklist</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text">Are you sure you want to blacklist <strong id="blacklistUsername"></strong>?</p>
+                <p class="modal-text">This will prevent the user from verifying again and remove them from authorized users.</p>
+                <div class="user-details">
+                    <p><strong>User ID:</strong> <span id="blacklistUserId"></span></p>
+                    <p><strong>IP Address:</strong> <span id="blacklistUserIp"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirmBlacklist">Confirm Blacklist</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const blacklistModal = document.getElementById('blacklistModal');
+        const userSearch = document.getElementById('userSearch');
+        const refreshButtons = document.querySelectorAll('.refresh-btn');
+        
+        let selectedUserId = '';
+        let selectedUsername = '';
+        let selectedUserIp = '';
+
+        function openBlacklistModal(userId, username, ip) {
+            selectedUserId = userId;
+            selectedUsername = username;
+            selectedUserIp = ip;
+            
+            document.getElementById('blacklistUsername').textContent = username;
+            document.getElementById('blacklistUserId').textContent = userId;
+            document.getElementById('blacklistUserIp').textContent = ip;
+            
+            blacklistModal.style.display = 'flex';
+        }
+        
+        // Close modal
+        function closeModal() {
+            blacklistModal.style.display = 'none';
+        }
+
+        document.getElementById('confirmBlacklist').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/api/blacklist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: selectedUserId,
+                        username: selectedUsername,
+                        ip: selectedUserIp
+                    })
+                });
+                
+                if (response.ok) {
+                    closeModal();
+                    alert(`${selectedUsername} has been blacklisted successfully`);
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        function removeAuthorization(userId) {
+            if (confirm('Are you sure you want to remove this authorization?')) {
+                fetch(`/api/verified-users/${userId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove authorization');
+                    }
+                })
+                .catch(error => alert('Error: ' + error.message));
+            }
+        }
+
+        function removeBlacklist(userId) {
+            if (confirm('Are you sure you want to remove this user from blacklist?')) {
+                fetch(`/api/blacklist/${userId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to remove from blacklist');
+                    }
+                })
+                .catch(error => alert('Error: ' + error.message));
+            }
+        }
+
+        userSearch.addEventListener('input', function() {
+            const term = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.user-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+
+        refreshButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.add('refreshing');
+                setTimeout(() => {
+                    this.classList.remove('refreshing');
+                    location.reload();
+                }, 1000);
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === blacklistModal) {
+                closeModal();
+            }
+        });
+        document.querySelectorAll('.token-cell').forEach(cell => {
+            cell.addEventListener('mouseenter', function() {
+                const tokenValue = this.querySelector('.token-value');
+                if (tokenValue.textContent === '••••••••') {
+                    const userId = this.closest('tr').getAttribute('data-user-id');
+                    fetch(`/api/user-token/${userId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.token) {
+                                tokenValue.textContent = data.token;
+                            }
+                        });
+                }
+            });
+        });
+
+        setInterval(() => {
+            fetch('/api/verified-users')
+                .then(res => res.json())
+                .then(users => {
+                    const count = users.length;
+                    document.querySelectorAll('.user-count')[1].textContent = count;
+                });
+        }, 30000);
+    </script>
+</body>
+</html>

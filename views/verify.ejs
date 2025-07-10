@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification | DSVerify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5865F2;
+            --primary-dark: #4752c4;
+            --secondary: #57F287;
+            --dark: #1e1f29;
+            --darker: #171820;
+            --light: #f0f0f0;
+            --text: #ffffff;
+            --text-muted: #b9bbbe;
+            --card-bg: rgba(30, 31, 41, 0.8);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .verify-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .verify-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 4rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .verify-card:before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--primary));
+            background-size: 400% 400%;
+            z-index: -1;
+            border-radius: 22px;
+            animation: borderAnimation 3s linear infinite;
+        }
+        
+        .verify-card:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            z-index: -1;
+        }
+        
+        .brand-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+        
+        .verify-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .verify-description {
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        .verify-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 1.3rem 3rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.3rem;
+            transition: var(--transition);
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(88, 101, 242, 0.3);
+        }
+        
+        .verify-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(88, 101, 242, 0.4);
+        }
+        
+        .features-list {
+            margin: 3rem 0;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-muted);
+        }
+        
+        .security-note {
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="verify-card">
+            <div class="brand-logo">DSVerify</div>
+            
+            <h1 class="verify-title">
+                <i class="fas fa-shield-alt"></i> Account Verification
+            </h1>
+            
+            <p class="verify-description">
+                To access exclusive features, please verify your Discord account. 
+                This quick process ensures security and grants you full access.
+            </p>
+            
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i>
+                    <span>Secure authentication process</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i>
+                    <span>Instant access upon verification</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i>
+                    <span>Encrypted data protection</span>
+                </div>
+            </div>
+            
+            <div class="security-note">
+                <i class="fas fa-lock"></i>
+                <span>Your information is always kept private and secure</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
