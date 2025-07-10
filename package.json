@@ -1,14 +1,16 @@
 {
-  "name": "project",
+  "name": "dsverify",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "bot": "node bot.js",
+    "vercel-build": "echo 'Build for Vercel'",
+    "fix-deps": "npm install axios@1.10.0 --force && npm dedupe"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "axios": "^1.10.0",  
     "discord.js": "^14.21.0",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
@@ -16,9 +18,14 @@
     "express-session": "^1.18.1",
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",
+    "fs-extra": "^11.2.0",
     "public-ip": "^7.0.1",
-    "rf": "^0.0.1",
-    "rm": "^0.1.8"
+    "keyauth": "^1.0.3"
   },
-  "description": ""
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "resolutions": {
+    "axios": "1.10.0"  
+  }
 }
