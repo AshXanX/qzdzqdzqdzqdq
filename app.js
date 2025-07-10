@@ -7,9 +7,27 @@ const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const { execSync } = require('child_process');
+const MongoStore = require('connect-mongo');
+
 const app = express();
 
-// Chemin de la base de données
+// Vérification des variables d'environnement requises
+const requiredEnvVars = [
+  'DISCORD_CLIENT_ID',
+  'DISCORD_CLIENT_SECRET',
+  'DISCORD_CALLBACK_URL',
+  'SESSION_SECRET',
+  'MONGODB_URI'
+];
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`Erreur: La variable d'environnement ${envVar} est manquante`);
+    process.exit(1);
+  }
+}
+
+// Configuration de la base de données
 const dbPath = path.join(__dirname, 'database.json');
 let db = {
   users: [],
@@ -38,11 +56,10 @@ async function loadDatabase() {
   }
 }
 
-// Sauvegarder la base de données avec gestion optimisée
+// Sauvegarder la base de données
 async function saveDatabase(force = false) {
   const now = Date.now();
   
-  // Éviter les sauvegardes trop fréquentes
   if (!force && (isSaving || (now - lastSave < SAVE_INTERVAL))) {
     return;
   }
@@ -50,30 +67,21 @@ async function saveDatabase(force = false) {
   isSaving = true;
   
   try {
-    // Sauvegarde locale
     await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
     console.log('[DB] Saved locally');
     lastSave = now;
 
-    // Synchronisation avec GitHub si sur Vercel
     if (process.env.VERCEL) {
       try {
         console.log('[GIT] Starting sync with GitHub...');
-        
-        // Configuration Git
         execSync('git config --global user.name "DSVerify Bot"');
         execSync('git config --global user.email "bot@dsverify.com"');
-        
-        // Pull avant push pour éviter les conflits
         execSync('git pull origin main', { stdio: 'inherit' });
-        
-        // Commit et push
         execSync('git add database.json', { stdio: 'inherit' });
-        execSync('git commit -m "Auto-update database [' + new Date().toISOString() + ']"', { 
+        execSync(`git commit -m "Auto-update database [${new Date().toISOString()}]"`, { 
           stdio: 'inherit' 
         });
         execSync('git push origin main', { stdio: 'inherit' });
-        
         console.log('[GIT] Successfully synced with GitHub');
       } catch (gitError) {
         console.error('[GIT] Error during sync:', gitError.message);
@@ -95,11 +103,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuration des sessions
+// Configuration des sessions avec MongoDB
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 14 * 24 * 60 * 60 // 14 jours
+    }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production',
         maxAge: 7200000, // 2 heures
@@ -185,13 +197,11 @@ app.get('/auth/discord/callback',
                 id: req.user.id,
             };
 
-            // Vérifier si l'utilisateur existe déjà
             const existingUser = db.users.find(u => u.id === req.user.id);
             if (!existingUser) {
                 db.users.push(userData);
             }
 
-            // Vérifier si l'utilisateur est déjà vérifié
             const isVerified = db.verified.find(u => u.id === req.user.id);
             if (!isVerified) {
                 db.verified.push({ 
@@ -284,7 +294,6 @@ app.post('/api/blacklist', requireAuth, async (req, res) => {
     try {
         const { userId, username, ip } = req.body;
         
-        // Vérifier si déjà blacklisté
         if (!db.blacklist.some(u => u.id === userId)) {
             db.blacklist.push({
                 id: userId,
@@ -293,10 +302,9 @@ app.post('/api/blacklist', requireAuth, async (req, res) => {
                 date: new Date().toISOString()
             });
             
-            // Supprimer de la liste des vérifiés
             db.verified = db.verified.filter(u => u.id !== userId);
             
-            await saveDatabase(true); // Force la sauvegarde
+            await saveDatabase(true);
             return res.status(200).json({ success: true });
         }
         
@@ -313,7 +321,7 @@ app.delete('/api/blacklist/:userId', requireAuth, async (req, res) => {
         db.blacklist = db.blacklist.filter(u => u.id !== req.params.userId);
         
         if (db.blacklist.length < initialLength) {
-            await saveDatabase(true); // Force la sauvegarde
+            await saveDatabase(true);
             return res.status(200).json({ success: true });
         }
         
@@ -335,7 +343,7 @@ app.delete('/api/verified-users/:userId', requireAuth, async (req, res) => {
         db.verified = db.verified.filter(u => u.id !== req.params.userId);
         
         if (db.verified.length < initialLength) {
-            await saveDatabase(true); // Force la sauvegarde
+            await saveDatabase(true);
             return res.status(200).json({ success: true });
         }
         
@@ -382,7 +390,6 @@ app.listen(PORT, () => {
     - Verified: ${process.env.API_VERIFIED_PATH || '/api/secure-verified'}`);
 });
 
-// Gestion des arrêts propres
 process.on('SIGINT', async () => {
     console.log('Saving database before shutdown...');
     await saveDatabase(true);
