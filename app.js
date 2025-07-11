@@ -7,7 +7,6 @@ const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const { execSync } = require('child_process');
-const MongoStore = require('connect-mongo');
 
 const app = express();
 
@@ -16,8 +15,7 @@ const requiredEnvVars = [
   'DISCORD_CLIENT_ID',
   'DISCORD_CLIENT_SECRET',
   'DISCORD_CALLBACK_URL',
-  'SESSION_SECRET',
-  'MONGODB_URI'
+  'SESSION_SECRET'
 ];
 
 for (const envVar of requiredEnvVars) {
@@ -27,7 +25,7 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
-// Configuration de la base de données
+// Configuration de la base de données JSON
 const dbPath = path.join(__dirname, 'database.json');
 let db = {
   users: [],
@@ -103,15 +101,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuration des sessions avec MongoDB
+// Configuration des sessions (sans MongoDB)
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        ttl: 14 * 24 * 60 * 60 // 14 jours
-    }),
     cookie: { 
         secure: process.env.NODE_ENV === 'production',
         maxAge: 7200000, // 2 heures
