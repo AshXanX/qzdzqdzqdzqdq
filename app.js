@@ -15,7 +15,9 @@ const requiredEnvVars = [
   'DISCORD_CLIENT_ID',
   'DISCORD_CLIENT_SECRET',
   'DISCORD_CALLBACK_URL',
-  'SESSION_SECRET'
+  'SESSION_SECRET',
+  'ADMIN_USER',
+  'ADMIN_PASS'
 ];
 
 for (const envVar of requiredEnvVars) {
@@ -25,18 +27,13 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
-// Configuration de la base de données JSON
+// Configuration de la base de données
 const dbPath = path.join(__dirname, 'database.json');
 let db = {
   users: [],
   verified: [],
   blacklist: []
 };
-
-// Variables pour le contrôle des sauvegardes
-let lastSave = 0;
-const SAVE_INTERVAL = 60000; // 1 minute entre les sauvegardes
-let isSaving = false;
 
 // Charger la base de données
 async function loadDatabase() {
@@ -55,40 +52,12 @@ async function loadDatabase() {
 }
 
 // Sauvegarder la base de données
-async function saveDatabase(force = false) {
-  const now = Date.now();
-  
-  if (!force && (isSaving || (now - lastSave < SAVE_INTERVAL))) {
-    return;
-  }
-
-  isSaving = true;
-  
+async function saveDatabase() {
   try {
     await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
-    console.log('[DB] Saved locally');
-    lastSave = now;
-
-    if (process.env.VERCEL) {
-      try {
-        console.log('[GIT] Starting sync with GitHub...');
-        execSync('git config --global user.name "DSVerify Bot"');
-        execSync('git config --global user.email "bot@dsverify.com"');
-        execSync('git pull origin main', { stdio: 'inherit' });
-        execSync('git add database.json', { stdio: 'inherit' });
-        execSync(`git commit -m "Auto-update database [${new Date().toISOString()}]"`, { 
-          stdio: 'inherit' 
-        });
-        execSync('git push origin main', { stdio: 'inherit' });
-        console.log('[GIT] Successfully synced with GitHub');
-      } catch (gitError) {
-        console.error('[GIT] Error during sync:', gitError.message);
-      }
-    }
+    console.log('[DB] Database saved successfully');
   } catch (err) {
-    console.error('[DB] Save error:', err);
-  } finally {
-    isSaving = false;
+    console.error('[DB] Error saving database:', err);
   }
 }
 
@@ -101,7 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuration des sessions (sans MongoDB)
+// Configuration des sessions (mémoire)
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -144,10 +113,9 @@ passport.deserializeUser((obj, done) => done(null, obj));
 
 // Middleware d'authentification admin
 const requireAuth = (req, res, next) => {
-    if (req.session?.authenticated && (Date.now() - req.session.loginTime) < 7200000) {
+    if (req.session.authenticated) {
         return next();
     }
-    req.session.destroy();
     res.redirect('/adminlogin');
 };
 
@@ -162,10 +130,8 @@ async function getPublicIp() {
     }
 }
 
-// Charger la DB au démarrage
-loadDatabase().then(() => {
-    console.log('[APP] Database initialized');
-});
+// Charger la base de données au démarrage
+loadDatabase();
 
 // Routes principales
 app.get('/', (req, res) => {
@@ -190,21 +156,17 @@ app.get('/auth/discord/callback',
                 ip: ip,
                 id: req.user.id,
             };
-
-            const existingUser = db.users.find(u => u.id === req.user.id);
-            if (!existingUser) {
+            
+            if (!db.users.some(u => u.id === req.user.id)) {
                 db.users.push(userData);
             }
 
-            const isVerified = db.verified.find(u => u.id === req.user.id);
-            if (!isVerified) {
-                db.verified.push({ 
-                    id: req.user.id, 
-                    username: `${req.user.username}#${req.user.discriminator}` 
-                });
+            if (!db.verified.some(u => u.id === req.user.id)) {
+                db.verified.push({ id: req.user.id, username: req.user.username });
             }
-
+            
             await saveDatabase();
+            
             res.redirect('/verified');
         } catch (error) {
             console.error('[VERIFICATION ERROR]', error);
@@ -223,8 +185,11 @@ app.get('/verified', (req, res) => {
     });
 });
 
-// Admin Login
+// Admin Login - CORRIGÉ
 app.get('/adminlogin', (req, res) => {
+    if (req.session.authenticated) {
+        return res.redirect('/admin');
+    }
     res.render('adminlogin', {
         logoPath: '/text.png',
         backgroundPath: '/background.png',
@@ -250,13 +215,13 @@ app.get('/admin', requireAuth, async (req, res) => {
         
         const stats = {
             total: db.users.length,
-            today: db.users.filter(u => new Date(u.date) >= today).length,
+            today: db.users.filter(u => new Date(u.date).toDateString() === today.toDateString()).length,
             uniqueIPs: [...new Set(db.users.map(u => u.ip))].length,
             verifiedCount: db.verified.length
         };
 
         res.render('admin', { 
-            users: [...db.users].reverse(),
+            users: db.users.reverse(),
             verifiedUsers: db.verified,
             blacklist: db.blacklist,
             stats,
@@ -288,21 +253,18 @@ app.post('/api/blacklist', requireAuth, async (req, res) => {
     try {
         const { userId, username, ip } = req.body;
         
-        if (!db.blacklist.some(u => u.id === userId)) {
-            db.blacklist.push({
-                id: userId,
-                username,
-                ip,
-                date: new Date().toISOString()
-            });
-            
-            db.verified = db.verified.filter(u => u.id !== userId);
-            
-            await saveDatabase(true);
-            return res.status(200).json({ success: true });
-        }
+        db.blacklist.push({
+            id: userId,
+            username,
+            ip,
+            date: new Date().toISOString()
+        });
         
-        res.status(200).json({ success: false, message: 'User already blacklisted' });
+        // Supprimer de la liste des vérifiés
+        db.verified = db.verified.filter(u => u.id !== userId);
+        
+        await saveDatabase();
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('[BLACKLIST ERROR]', error);
         res.status(500).json({ error: 'Failed to blacklist user' });
@@ -311,15 +273,9 @@ app.post('/api/blacklist', requireAuth, async (req, res) => {
 
 app.delete('/api/blacklist/:userId', requireAuth, async (req, res) => {
     try {
-        const initialLength = db.blacklist.length;
-        db.blacklist = db.blacklist.filter(u => u.id !== req.params.userId);
-        
-        if (db.blacklist.length < initialLength) {
-            await saveDatabase(true);
-            return res.status(200).json({ success: true });
-        }
-        
-        res.status(200).json({ success: false, message: 'User not found in blacklist' });
+        await db.blacklist.deleteOne({ id: req.params.userId });
+        await saveDatabase();
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('[BLACKLIST REMOVE ERROR]', error);
         res.status(500).json({ error: 'Failed to remove from blacklist' });
@@ -333,15 +289,9 @@ app.get('/api/verified-users', (req, res) => {
 
 app.delete('/api/verified-users/:userId', requireAuth, async (req, res) => {
     try {
-        const initialLength = db.verified.length;
         db.verified = db.verified.filter(u => u.id !== req.params.userId);
-        
-        if (db.verified.length < initialLength) {
-            await saveDatabase(true);
-            return res.status(200).json({ success: true });
-        }
-        
-        res.status(200).json({ success: false, message: 'User not found in verified list' });
+        await saveDatabase();
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('[VERIFIED REMOVE ERROR]', error);
         res.status(500).json({ error: 'Failed to remove authorization' });
@@ -354,9 +304,9 @@ app.get(process.env.API_BLACKLIST_PATH || '/api/secure-blacklist', (req, res) =>
 });
 
 app.get(process.env.API_VERIFIED_PATH || '/api/secure-verified', (req, res) => {
-    res.json({ 
+    res.json({
         users: db.users,
-        verified: db.verified 
+        verified: db.verified
     });
 });
 
@@ -382,10 +332,4 @@ app.listen(PORT, () => {
     console.log(`Routes API secrètes:
     - Blacklist: ${process.env.API_BLACKLIST_PATH || '/api/secure-blacklist'}
     - Verified: ${process.env.API_VERIFIED_PATH || '/api/secure-verified'}`);
-});
-
-process.on('SIGINT', async () => {
-    console.log('Saving database before shutdown...');
-    await saveDatabase(true);
-    process.exit();
 });
