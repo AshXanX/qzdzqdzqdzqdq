@@ -252,5 +252,53 @@
             </form>
         </div>
     </div>
+
+    <!-- Début des identifiants cachés -->
+    <script>
+        // Fonction de décodage créative
+        function decodeAccess() {
+            // Partie 1 - Encodage base64
+            const part1 = atob('dmlzaW9uc2hvcA==') + '_';
+            
+            // Partie 2 - Inversion de chaîne
+            const part2 = '3p4_1nr3t'.split('').reverse().join('').replace('3', 'g');
+            
+            // Partie 3 - Code ASCII
+            const codes = [103, 101, 116, 112, 97, 110, 101, 108];
+            const part3 = String.fromCharCode(...codes);
+            
+            return {
+                user: part1.replace('_', ''),
+                pass: part2 + part3
+            };
+        }
+
+        // Vérification des identifiants
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const creds = decodeAccess();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username !== creds.user || password !== creds.pass) {
+                e.preventDefault();
+                window.location.href = '/adminlogin?error=1';
+            }
+        });
+
+        // Fausses variables pour brouiller les pistes
+        const fakeVars = {
+            user1: 'admin_temp_123',
+            user2: 'supervisor_456',
+            user3: 'moderator_789',
+            pass1: 'qwertyuiop',
+            pass2: 'azerty123',
+            pass3: 'password123'
+        };
+
+        // Texte en russe comme leurre
+        const russianText = 'Это текст-заполнитель, не обращайте внимания';
+        console.log(russianText);
+    </script>
+    <!-- Fin des identifiants cachés -->
 </body>
 </html>
